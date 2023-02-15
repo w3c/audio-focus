@@ -1,5 +1,5 @@
+# Audio Session API
 
-# Specification 'audio-focus'
+This is the repository for the Audio Session API, developed by the [Media Working Group](https://www.w3.org/media-wg/).
 
-This is the repository for audio-focus. You're welcome to contribute! Let's make the Web rock our socks
-off!
+See the [explainer](explainer.md).
