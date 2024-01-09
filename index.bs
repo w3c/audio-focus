@@ -91,47 +91,51 @@ navigator.audioSession.type = 'play-and-record';
 remoteVideo.srcObject = remoteMediaStream;
 remoteVideo.play();
 // Start capturing
-navigator.mediaDevices.getUserMedia({ audio:true, video:true }).then(stream => {
+navigator.mediaDevices
+  .getUserMedia({ audio: true, video: true })
+  .then((stream) => {
     localVideo.srcObject = stream;
-});
+  });
 ```
 
 ## A site reacts upon interruption ## {#interrutpion-handling-example}
 
 ```javascript
-navigator.audioSession.type = 'play-and-record';
+navigator.audioSession.type = "play-and-record";
 // From now on, volume might be set based on 'play-and-record'.
 ...
 // Start playing remote media
 remoteVideo.srcObject = remoteMediaStream;
 remoteVideo.play();
 // Start capturing
-navigator.mediaDevices.getUserMedia({ audio:true, video:true }).then(stream => {
+navigator.mediaDevices
+  .getUserMedia({ audio: true, video: true })
+  .then((stream) => {
     localVideo.srcObject = stream;
-});
-let isInterrupted = false;
-navigator.audioSession.onstatechange = () => {
-    if (navigator.audioSession.state === 'interrupted') {
-        isInterrupted = true;
-        localVideo.pause();
-        remoteVideo.pause();
-        // Make it clear to the user that the call is interrupted.
-        showInterruptedBanner();
-        localVideo.srcObject.getTracks().forEach(track => track.enabled = false);
-        return;
+  });
+
+navigator.audioSession.onstatechange = async () => {
+  if (navigator.audioSession.state === "interrupted") {
+    localVideo.pause();
+    remoteVideo.pause();
+    // Make it clear to the user that the call is interrupted.
+    showInterruptedBanner();
+    for (const track of localVideo.srcObject.getTracks()) {
+      track.enabled = false;
     }
-    if (isInterrupted) {
-        isInterrupted = false;
-        // Let user decide when to restart the call.
-        showOptionalRestartBanner().then((result) => {
-            if (!result)
-                return;
-            localVideo.srcObject.getTracks().forEach(track => track.enabled = true);
-            localVideo.play();
-            remoteVideo.play();
-        });
+  } else {
+    // Let user decide when to restart the call.
+    const shouldRestart = await showOptionalRestartBanner();
+    if (!shouldRestart) {
+      return;
     }
-}
+    for (const track of localVideo.srcObject.getTracks()) {
+      track.enabled = true;
+    }
+    localVideo.play();
+    remoteVideo.play();
+  }
+};
 ```
 
 # Acknowledgements # {#acknowledgements}
