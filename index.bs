@@ -136,4 +136,6 @@ navigator.audioSession.onstatechange = () => {
 
 # Acknowledgements # {#acknowledgements}
 
-TODO
+The Working Group acknowledges the following people for their invaluable contributions to this specification:
+
+* Becca Hughes
