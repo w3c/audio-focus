@@ -23,55 +23,86 @@ Additionally, on some platforms the user agent will automatically manage the aud
 based on whether media elements are playing or not and which APIs are used for playing audio.
 In some cases this may not match user expectations, this API provides overrides to authors.
 
-# The {{AudioSession}} interface # {#audio-session}
+# The {{AudioSession}} interface # {#audiosession-interface}
 
-By convention, there are several `audio session types` for different purposes:
+An <dfn>audio session</dfn> represents the playback of auditory media.
+An audio session can be of particular [=audio session/type=] and in a given [=audio session/state=].
 
- * Playback ({{AudioSessionType/playback}}) audio, which is used for video or music playback, podcasts, etc. They should not mix with other playback audio. (Maybe) they should pause all other audio indefinitely.
- * Transient ({{AudioSessionType/transient}}) audio, such as a notification ping. They usually should play on top of playback audio (and maybe also "duck" persistent audio).
- * Transient solo ({{AudioSessionType/transient-solo}}) audio, such as driving directions. They should pause/mute all other audio and play exclusively. When a transient-solo audio ended, it should resume the paused/muted audio.
- * Ambient ({{AudioSessionType/ambient}}) audio, which is mixable with other types of audio. This is useful in some special cases such as when the user wants to mix audios from multiple pages.
- * Play and record ({{AudioSessionType/play-and-record}}) audio, which is used for recording audio. This is useful in cases microphone is being used or in video conferencing applications.
- * Auto ({{AudioSessionType/auto}}) lets the User Agent choose the best audio session type according the use of audio by the web page. This is the type of the default {{AudioSession}}.
+The {{AudioSession}} is the main interface for this API, which is accessed through the {{Navigator}} interface (see [[#extensions-to-navigator]]).
 
-The {{AudioSession}} is the main interface for this API. It can have the following states:
+<pre class="idl">
+  [Exposed=Window]
+  interface AudioSession : EventTarget {
+    attribute AudioSessionType type;
 
- * {{AudioSessionState/active}}: the {{AudioSession}} is playing sound.
- * {{AudioSessionState/interrupted}}: the {{AudioSession}} is not playing sound, but can resume when it will get uninterrupted.
- * {{AudioSessionState/inactive}}: the {{AudioSession}} is not playing sound.
+    readonly attribute AudioSessionState state;
+    attribute EventHandler onstatechange;
+  };
+</pre>
+
+## Audio session states ## {#audio-session-types}
+
+By convention, there are several different [=audio session=] <dfn data-lt="type" for="audio session">types</dfn> for different purposes.
+In the API, these are represented by the {{AudioSessionType}} enum:
+
+<dl>
+  <dt><dfn for="AudioSessionType" enum-value>playback</dfn></dt>
+  <dd>Playback audio, which is used for video or music playback, podcasts, etc. They should not mix with other playback audio. (Maybe) they should pause all other audio indefinitely.</dd>
+  <dt><dfn for="AudioSessionType" enum-value>transient</dfn></dt>
+  <dd>Transient audio, such as a notification ping. They usually should play on top of playback audio (and maybe also "duck" persistent audio).</dd>
+  <dt><dfn for="AudioSessionType" enum-value>transient-solo</dfn></dt>
+  <dd>Transient solo audio, such as driving directions. They should pause/mute all other audio and play exclusively. When a transient-solo audio ended, it should resume the paused/muted audio.</dd>
+  <dt><dfn for="AudioSessionType" enum-value>ambient</dfn></dt>
+  <dd>Ambient audio, which is mixable with other types of audio. This is useful in some special cases such as when the user wants to mix audios from multiple pages.</dd>
+  <dt><dfn for="AudioSessionType" enum-value>play-and-record</dfn></dt>
+  <dd>Play and record audio, which is used for recording audio. This is useful in cases microphone is being used or in video conferencing applications.</dd>
+  <dt><dfn for="AudioSessionType" enum-value>auto</dfn></dt>
+  <dd>Auto lets the User Agent choose the best audio session type according the use of audio by the web page. This is the type of the default {{AudioSession}}.</dd>
+</dl>
+
+<pre class="idl">
+  enum AudioSessionType {
+    "auto",
+    "playback",
+    "transient",
+    "transient-solo",
+    "ambient",
+    "play-and-record"
+  };
+</pre>
+
+## Audio session states ## {#audio-session-states}
+
+An [=audio session=] can be in one of following <dfn data-lt="state" for="audio session">state</dfn> , which are represented in the API by the {{AudioSessionState}} enum:
+
+<dl>
+  <dt><dfn for="AudioSessionState" enum-value>active</dfn></dt>
+  <dd>the [=audio session=] is playing sound.</dd>
+  <dt><dfn for="AudioSessionState" enum-value>interrupted</dfn></dt>
+  <dd>the [=audio session=] is not playing sound, but can resume when it will get uninterrupted.</dd>
+  <dt><dfn for="AudioSessionState" enum-value>inactive</dfn></dt>
+  <dd>the [=audio session=] is not playing sound.</dd>
+</dl>
 
 The page has a default audio session which is used by the user agent to automatically set up the audio session parameters.
 The UA will request and abandon audio focus when media elements start/finish playing on the page.
 This default audio session is represented as an {{AudioSession}} object that is exposed as {{Navigator/audioSession|navigator.audioSession}}.
 
 <pre class="idl">
-enum AudioSessionState {
-  "inactive",
-  "active",
-  "interrupted"
-};
+  enum AudioSessionState {
+    "inactive",
+    "active",
+    "interrupted"
+  };
+</pre>
 
-enum AudioSessionType {
-  "auto",
-  "playback",
-  "transient",
-  "transient-solo",
-  "ambient",
-  "play-and-record"
-};
+# Extensions to the `Navigator` interface # {#extensions-to-navigator}
 
+<pre class="idl">
 [Exposed=Window]
 partial interface Navigator {
   // The default audio session that the user agent will use when media elements start/stop playing.
   readonly attribute AudioSession audioSession;
-};
-
-[Exposed=Window]
-interface AudioSession : EventTarget {
-  attribute AudioSessionType type;
-
-  readonly attribute AudioSessionState state;
-  attribute EventHandler onstatechange;
 };
 </pre>
 
